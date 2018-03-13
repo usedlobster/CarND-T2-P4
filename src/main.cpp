@@ -3,7 +3,7 @@
 #include "json.hpp"
 #include "PID.h"
 #include <math.h>
-#include <fstream> 
+#include <fstream>
 
 // for convenience
 using json = nlohmann::json;
@@ -83,7 +83,7 @@ int main( int argc, char *argv[] ) {
                         steer_value = 1.0 ;
 
 
-                  
+
 
                     // send current error to auto-tuner - to twiddle the parameters
                     /*
@@ -133,13 +133,13 @@ int main( int argc, char *argv[] ) {
         if (!reset_flag) {
             std::cout << "Connected!!!" << std::endl;
             // open file to plot cte
-            ofs.open( "plot.dat" , std::ofstream::out | std::ofstream::trunc ) ;
+            ofs.open( "plot.dat", std::ofstream::out | std::ofstream::trunc ) ;
             // send simulator reset request
             std::string msg = "42[\"reset\",{}]";
             ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
             // reset will disconnect socket , so make sure we only do reset once.
             reset_flag = true ;
-          }
+        }
     });
 
     h.onDisconnection([&h,&reset_flag,&ofs](uWS::WebSocket<uWS::SERVER> ws, int code, char *message, size_t length) {
