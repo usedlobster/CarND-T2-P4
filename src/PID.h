@@ -60,7 +60,7 @@ class PidAutoTuner {
     void StartTune() ;
   public:
     PidAutoTuner() ;
-    bool Update( double e, PID &pid ) ;
+    bool Update( double e , PID &pid ) ;
 } ;
 
 

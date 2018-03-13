@@ -82,9 +82,12 @@ int main( int argc, char *argv[] ) {
                     else if ( steer_value > 1.0 )
                         steer_value = 1.0 ;
 
-                    // send current error to auto-tuner - to twiddle the parameters
 
-                    if ( tuner.Update(  cte  , pid ) )
+                  
+
+                    // send current error to auto-tuner - to twiddle the parameters
+                    /*
+                    if ( tuner.Update(  ( cte * cte )  + (225.0-speed)/100.0 , pid ) )
                     {
                       // we request a scene reload - so we can start with same initial conditions.
                       std::string msg = "42[\"reset\",{}]";
@@ -92,8 +95,7 @@ int main( int argc, char *argv[] ) {
                       ofs.close() ;
                       reset_flag = false ;
                     }
-                    
-
+                    */
                     ofs << cte << std::endl ;
 
 
@@ -130,16 +132,19 @@ int main( int argc, char *argv[] ) {
     h.onConnection([&h,&reset_flag,&ofs](uWS::WebSocket<uWS::SERVER> ws, uWS::HttpRequest req) {
         if (!reset_flag) {
             std::cout << "Connected!!!" << std::endl;
-
+            // open file to plot cte
             ofs.open( "plot.dat" , std::ofstream::out | std::ofstream::trunc ) ;
+            // send simulator reset request
             std::string msg = "42[\"reset\",{}]";
             ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+            // reset will disconnect socket , so make sure we only do reset once.
             reset_flag = true ;
           }
     });
 
     h.onDisconnection([&h,&reset_flag,&ofs](uWS::WebSocket<uWS::SERVER> ws, int code, char *message, size_t length) {
-        ws.close();
+        ws.close() ;
+        // close the plot file
         ofs.close() ;
         std::cout << "Disconnected" << std::endl;
         reset_flag = false ;
