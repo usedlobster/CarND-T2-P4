@@ -37,6 +37,7 @@ double PID::TotalError() {
     return ( p_error * Kp ) + ( i_error * Ki ) + ( d_error * Kd ) ;
 }
 
+// my auto-tuner
 
 PidAutoTuner::PidAutoTuner() {
     // skip first nSkip readings
@@ -55,6 +56,7 @@ PidAutoTuner::PidAutoTuner() {
     error_sum_squared = 0.0 ;
 
 }
+
 
 
 bool PidAutoTuner::Update( double e, PID &pid ) {
@@ -114,13 +116,12 @@ bool PidAutoTuner::Update( double e, PID &pid ) {
             }
         }
 
-
         twiddle_param = ( twiddle_param + 1 ) % 3 ;
         twiddle_step = 0 ;
 
     }
 
-    // change pid gains
+    // change pid parameters
     pid.Init( p[0], p[1], p[2] ) ;
     // reset step count
     iter = 0.0 ;
