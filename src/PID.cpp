@@ -42,13 +42,13 @@ double PID::TotalError() {
 PidAutoTuner::PidAutoTuner() {
     // skip first nSkip readings
     nSkip			= 200    ;
-    nRun			= 1800	 ;
+    nRun			= 800	 ;
 
     delta[0] = 1.0		  ;
     delta[1] = 1.0		  ;
     delta[2] = 1.0		  ;
-    best_error_so_far = 1e100 ;
-    twiddle_step  = 0	  ;
+    best_error_so_far = 1e100;
+    twiddle_step  = 1	  ;
     twiddle_param = 0 	  ;
 
     //
@@ -69,14 +69,14 @@ bool PidAutoTuner::Update( double e, PID &pid ) {
 
     if ( iter == nSkip )
         error_sum_squared = e ; // first sample
-    else if ( ( e < -5.0 ) && ( e > 5.0 ))
+    else if ( ( e < -5.0 ) && ( e > 5.0 )) {
         error_sum_squared = best_error_so_far + 1.0 ; // force opt out early if e is between these
-    else
+    } else
         error_sum_squared += e ; //   sum error so far  ( we assume only passed e > 0 )
 
 
     // have we twiddled enougth
-    if ( ( delta[0] + delta[1] + delta[2] ) < 1e-3 ) {
+    if ( ( delta[0] + delta[1] + delta[2] ) < 0.01 ) {
         iter = 0 ;
         std::cout << "-DONE-" << std::endl ;
         return  false ;
@@ -124,6 +124,9 @@ bool PidAutoTuner::Update( double e, PID &pid ) {
     // change pid parameters
     pid.Init( p[0], p[1], p[2] ) ;
     // reset step count
+    std::cout << "[" << best_error_so_far << ":" << pid.Kp << ":" << pid.Ki << ":" << pid.Kd << "]" << std::endl ;
+
+
     iter = 0.0 ;
     //
     return  true ;

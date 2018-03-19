@@ -43,18 +43,33 @@ int main( int argc, char *argv[] ) {
 
     bool reset_flag = false ;
 
-    // Initialize the pid variables.
+    // Initialize the pid variables from command line or use the best values found
 
-    pid.Init(  argc > 1 ? atof( argv[1] ) : 0.15,
-               argc > 2 ? atof( argv[2] ) : 0.0004,
-               argc > 3 ? atof( argv[3] ) : 1.5  ) ;
+    pid.Init(  argc > 1 ? atof( argv[1] ) : 0.43463,
+               argc > 2 ? atof( argv[2] ) : 0.00104,
+               argc > 3 ? atof( argv[3] ) : 7.28484 ) ;
+
+    bool do_tune = false ;
+    bool do_plot = false ;
+
+    if ( argc > 4 ) {
+        std::vector<std::string> cmd_args ;
+        cmd_args.assign( argv+4, argv+argc ) ;
+
+        for( auto &arg : cmd_args ) {
+            if ( arg.compare( "/tune" ) == 0 )
+                do_tune = true ;
+            else if ( arg.compare( "/plot" ) == 0 )
+                do_plot = true ;
+        }
+    }
 
     std::ofstream ofs ;
 
-
+    // show initial parameters
     std::cout << "P: " << pid.Kp << " I: " << pid.Ki  << " D: " << pid.Kd << std::endl ;
 
-    h.onMessage([&pid,&tuner,&ofs,&reset_flag](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+    h.onMessage([&pid,&tuner,&ofs,&reset_flag,&do_tune,&do_plot](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
         // "42" at the start of the message means there's a websocket message event.
         // The 4 signifies a websocket message
         // The 2 signifies a websocket event
@@ -82,21 +97,19 @@ int main( int argc, char *argv[] ) {
                     else if ( steer_value > 1.0 )
                         steer_value = 1.0 ;
 
-
-
-
                     // send current error to auto-tuner - to twiddle the parameters
-                    /*
-                    if ( tuner.Update(  ( cte * cte )  + (225.0-speed)/100.0 , pid ) )
-                    {
-                      // we request a scene reload - so we can start with same initial conditions.
-                      std::string msg = "42[\"reset\",{}]";
-                      ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
-                      ofs.close() ;
-                      reset_flag = false ;
+                    if ( do_tune ) {
+                        if ( tuner.Update(  ( cte * cte )  + (100.0-speed)/100.0, pid ) ) {
+                            // we request a scene reload - so we can start with same initial conditions.
+                            std::string msg = "42[\"reset\",{}]";
+                            ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+                            ofs.close() ;
+                            reset_flag = false ;
+                        }
                     }
-                    */
-                    ofs << cte << std::endl ;
+
+                    if ( do_plot )
+                        ofs << cte << std::endl ;
 
 
                     json msgJson;
@@ -129,12 +142,14 @@ int main( int argc, char *argv[] ) {
         }
     });
 
-    h.onConnection([&h,&reset_flag,&ofs](uWS::WebSocket<uWS::SERVER> ws, uWS::HttpRequest req) {
+    h.onConnection([&h,&reset_flag,&ofs,&do_plot](uWS::WebSocket<uWS::SERVER> ws, uWS::HttpRequest req) {
         if (!reset_flag) {
             std::cout << "Connected!!!" << std::endl;
-            // open file to plot cte
-            ofs.open( "plot.dat", std::ofstream::out | std::ofstream::trunc ) ;
-            // send simulator reset request
+            if ( do_plot ) {
+                // open file to plot cte
+                ofs.open( "plot.dat", std::ofstream::out | std::ofstream::trunc ) ;
+            }
+            // send simulator reset
             std::string msg = "42[\"reset\",{}]";
             ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
             // reset will disconnect socket , so make sure we only do reset once.
@@ -144,7 +159,7 @@ int main( int argc, char *argv[] ) {
 
     h.onDisconnection([&h,&reset_flag,&ofs](uWS::WebSocket<uWS::SERVER> ws, int code, char *message, size_t length) {
         ws.close() ;
-        // close the plot file
+        // close the plot file even if not using
         ofs.close() ;
         std::cout << "Disconnected" << std::endl;
         reset_flag = false ;
