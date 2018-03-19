@@ -40,4 +40,4 @@ The chart below shows how the output has been kept to 0 as much as possible. A v
 ![f-plot](images/plot-final.png)
 
 ![video](images/video.mp4)
-
+![Video](https://github.com/usedlobster/CarND-T2-P4/images/video.mp4?raw=true)
