@@ -35,9 +35,12 @@ After running for a few hours, the algorithm came up with the following as the b
 
 ### Kp = 0.43463 , Ki = 0.00104  , Kd = 7.28484 
 
-The chart below shows how the output has been kept to 0 as much as possible. A video of the car running with these parameters is shown.
+
+The chart below shows how these parameters try to keep the c.t.e at 0.
 
 ![f-plot](images/plot-final.png)
 
+A video of the car running with these parameters is 
+
 ![video](images/video.mp4)
-![Video](https://github.com/usedlobster/CarND-T2-P4/images/video.mp4?raw=true)
+
