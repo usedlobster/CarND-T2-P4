@@ -41,6 +41,5 @@ The chart below shows how these parameters try to keep the c.t.e at 0.
 ![f-plot](images/plot-final.png)
 
 A video of the car running with these parameters is 
-
-![video](images/video.mp4)
+[video](https://youtu.be/g9eLASW-bus)
 
